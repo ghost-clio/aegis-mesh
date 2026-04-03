@@ -1,0 +1,7 @@
+node_modules/
+.env
+*.log
+dist/
+.DS_Store
+aegis-core/
+mesh/node_modules/

@@ -1,0 +1,16 @@
+{
+  "name": "aegis-mesh",
+  "version": "1.0.0",
+  "description": "Governed multi-agent economy — Aegis treasury + dual-chain x402 mesh (Arbitrum + XRPL EVM)",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --test test/*.test.js",
+    "demo": "node src/demo.js",
+    "harness": "node src/harness.js",
+    "dashboard": "open docs/index.html"
+  },
+  "dependencies": {
+    "express": "^5.2.1"
+  }
+}

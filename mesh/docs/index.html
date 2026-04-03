@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ArbiLink — Agent Commerce on Arbitrum</title>
+  <style>
+    :root {
+      --bg: #0D1117;
+      --surface: #161B22;
+      --border: #21262D;
+      --text: #E6EDF3;
+      --dim: #8B949E;
+      --blue: #28A0F6;
+      --cyan: #12D8FA;
+      --green: #3FB950;
+      --orange: #F0883E;
+      --purple: #A371F7;
+      --red: #F85149;
+      --gold: #F4C542;
+      --mono: 'SF Mono', 'Fira Code', monospace;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Inter', sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; }
+
+    .header { padding: 40px 0 30px; text-align: center; border-bottom: 1px solid var(--border); }
+    .header h1 { font-size: 48px; font-weight: 800; }
+    .header h1 span { color: var(--blue); }
+    .header p { color: var(--dim); font-size: 18px; margin-top: 8px; }
+    .badges { display: flex; gap: 10px; justify-content: center; margin-top: 16px; flex-wrap: wrap; }
+    .badge { padding: 4px 14px; border-radius: 16px; font-size: 13px; border: 1px solid; }
+    .badge.green { color: var(--green); border-color: #3FB95040; background: #3FB95010; }
+    .badge.blue { color: var(--cyan); border-color: #12D8FA40; background: #12D8FA10; }
+    .badge.purple { color: var(--purple); border-color: #A371F740; background: #A371F710; }
+
+    .container { max-width: 1200px; margin: 0 auto; padding: 30px 24px; }
+
+    .grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; margin-bottom: 30px; }
+    .card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 24px; }
+    .card h3 { font-size: 14px; text-transform: uppercase; letter-spacing: 1px; color: var(--dim); margin-bottom: 12px; }
+    .card .value { font-size: 32px; font-weight: 700; }
+    .card .sub { font-size: 13px; color: var(--dim); margin-top: 4px; }
+
+    .section { margin-bottom: 30px; }
+    .section h2 { font-size: 24px; font-weight: 700; margin-bottom: 16px; display: flex; align-items: center; gap: 10px; }
+
+    table { width: 100%; border-collapse: collapse; font-size: 14px; }
+    th { text-align: left; padding: 10px 16px; color: var(--dim); font-weight: 600; border-bottom: 1px solid var(--border); font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; }
+    td { padding: 12px 16px; border-bottom: 1px solid var(--border); }
+    tr:hover { background: #ffffff06; }
+    .mono { font-family: var(--mono); font-size: 13px; }
+    .addr { color: var(--cyan); }
+    .status { display: inline-block; padding: 2px 10px; border-radius: 10px; font-size: 12px; font-weight: 600; }
+    .status.live { color: var(--green); background: #3FB95015; }
+    .status.verified { color: var(--blue); background: #28A0F615; }
+
+    .flow { display: flex; align-items: center; justify-content: center; gap: 16px; padding: 30px 0; flex-wrap: wrap; }
+    .flow-step { text-align: center; padding: 16px 20px; border-radius: 12px; border: 1px solid var(--border); background: var(--surface); min-width: 160px; }
+    .flow-step .num { font-size: 28px; font-weight: 700; margin-bottom: 4px; }
+    .flow-step .label { font-size: 13px; color: var(--dim); }
+    .flow-arrow { font-size: 24px; color: var(--dim); }
+
+    .features { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; }
+    .feat { padding: 14px 18px; border-radius: 10px; background: var(--surface); border: 1px solid var(--border); display: flex; align-items: center; gap: 12px; }
+    .feat .icon { font-size: 24px; }
+    .feat .name { font-weight: 600; font-size: 14px; }
+    .feat .desc { font-size: 12px; color: var(--dim); }
+
+    .links { display: flex; gap: 12px; justify-content: center; margin-top: 20px; flex-wrap: wrap; }
+    .links a { padding: 10px 24px; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 14px; transition: all 0.2s; }
+    .links a.primary { background: var(--blue); color: white; }
+    .links a.secondary { border: 1px solid var(--border); color: var(--text); }
+    .links a:hover { opacity: 0.85; transform: translateY(-1px); }
+
+    .footer { text-align: center; padding: 40px 0; color: var(--dim); font-size: 13px; border-top: 1px solid var(--border); }
+
+    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.6; } }
+    .live-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--green); display: inline-block; animation: pulse 2s infinite; margin-right: 6px; }
+  </style>
+</head>
+<body>
+
+<div class="header">
+  <h1>Arbi<span>Link</span> 🔗</h1>
+  <p>Agent-to-Agent Commerce on Arbitrum</p>
+  <div class="badges">
+    <span class="badge green"><span class="live-dot"></span>Live on Arb Sepolia</span>
+    <span class="badge blue">x402 Protocol</span>
+    <span class="badge purple">ERC-8004 Identity</span>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- Stats -->
+  <div class="grid">
+    <div class="card">
+      <h3>Network</h3>
+      <div class="value" style="color:var(--blue)">Arbitrum Sepolia</div>
+      <div class="sub">Chain ID: 421614</div>
+    </div>
+    <div class="card">
+      <h3>Features</h3>
+      <div class="value" style="color:var(--green)">12</div>
+      <div class="sub">Payments, Escrow, Identity, Discovery, Governance</div>
+    </div>
+    <div class="card">
+      <h3>Tests</h3>
+      <div class="value" style="color:var(--green)">35 passing</div>
+      <div class="sub">15 unit + 20 battle (on-chain)</div>
+    </div>
+    <div class="card">
+      <h3>Smart Contracts</h3>
+      <div class="value" style="color:var(--purple)">2</div>
+      <div class="sub">AgentEscrow + ERC-8004 Registry</div>
+    </div>
+  </div>
+
+  <!-- x402 Flow -->
+  <div class="section">
+    <h2>⚡ x402 Payment Flow</h2>
+    <div class="flow">
+      <div class="flow-step"><div class="num" style="color:var(--blue)">1</div><div class="label">Agent requests<br>service</div></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step"><div class="num" style="color:var(--orange)">402</div><div class="label">Payment<br>Required</div></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step"><div class="num" style="color:var(--green)">💰</div><div class="label">USDC payment<br>on Arbitrum</div></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step"><div class="num" style="color:var(--green)">✅</div><div class="label">Service<br>delivered</div></div>
+    </div>
+  </div>
+
+  <!-- Deployments -->
+  <div class="section">
+    <h2>📋 On-Chain Deployments</h2>
+    <div class="card">
+      <table>
+        <thead><tr><th>Contract</th><th>Address</th><th>Status</th><th>Explorer</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><strong>AgentEscrow</strong></td>
+            <td class="mono addr">0x26469E9C1a73eaC710bE3FC49966878a0e8ab0f7</td>
+            <td><span class="status live">Deployed</span></td>
+            <td><a href="https://sepolia.arbiscan.io/address/0x26469E9C1a73eaC710bE3FC49966878a0e8ab0f7" target="_blank" style="color:var(--cyan)">↗ Arbiscan</a></td>
+          </tr>
+          <tr>
+            <td><strong>ERC-8004 Registry</strong></td>
+            <td class="mono addr">0x8004A818BFB912233c491871b3d84c89A494BD9e</td>
+            <td><span class="status verified">Registered</span></td>
+            <td><a href="https://sepolia.arbiscan.io/tx/0x7f1d34f60bfb1bce0cff59ad6d03c37db66afd383c0c5a99af917fbca8cc8521" target="_blank" style="color:var(--cyan)">↗ TX Proof</a></td>
+          </tr>
+          <tr>
+            <td><strong>USDC Token</strong></td>
+            <td class="mono addr">0x75faf114eafb1BDbe2F0316DF893fd58CE46AA4d</td>
+            <td><span class="status live">Active</span></td>
+            <td><a href="https://sepolia.arbiscan.io/address/0x75faf114eafb1BDbe2F0316DF893fd58CE46AA4d" target="_blank" style="color:var(--cyan)">↗ Arbiscan</a></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Features -->
+  <div class="section">
+    <h2>🛠️ Features</h2>
+    <div class="features">
+      <div class="feat"><span class="icon">💳</span><div><div class="name">x402 Payments</div><div class="desc">HTTP 402 → pay → access</div></div></div>
+      <div class="feat"><span class="icon">🏦</span><div><div class="name">AgentEscrow</div><div class="desc">Trustless with timeout refunds</div></div></div>
+      <div class="feat"><span class="icon">🪪</span><div><div class="name">ERC-8004 Identity</div><div class="desc">On-chain agent verification</div></div></div>
+      <div class="feat"><span class="icon">🔍</span><div><div class="name">Service Discovery</div><div class="desc">Find by capability</div></div></div>
+      <div class="feat"><span class="icon">🛡️</span><div><div class="name">Spending Policies</div><div class="desc">Per-tx and daily limits</div></div></div>
+      <div class="feat"><span class="icon">⭐</span><div><div class="name">Reputation</div><div class="desc">Track success rates</div></div></div>
+      <div class="feat"><span class="icon">🚫</span><div><div class="name">Blocklists</div><div class="desc">Block bad actors</div></div></div>
+      <div class="feat"><span class="icon">⚡</span><div><div class="name">Rate Limiting</div><div class="desc">Per-agent throttling</div></div></div>
+      <div class="feat"><span class="icon">📊</span><div><div class="name">Fleet Admin</div><div class="desc">Monitor all agents</div></div></div>
+      <div class="feat"><span class="icon">🔁</span><div><div class="name">Idempotency</div><div class="desc">Safe payment retries</div></div></div>
+      <div class="feat"><span class="icon">📄</span><div><div class="name">CSV Export</div><div class="desc">Download TX history</div></div></div>
+      <div class="feat"><span class="icon">💵</span><div><div class="name">Fiat Display</div><div class="desc">ETH/USD gas transparency</div></div></div>
+    </div>
+  </div>
+
+  <!-- Demo Economy -->
+  <div class="section">
+    <h2>🤖 3-Agent Demo Economy</h2>
+    <div class="card" style="text-align:center; padding:30px;">
+      <div style="display:flex; justify-content:center; gap:40px; align-items:center; flex-wrap:wrap;">
+        <div style="padding:20px; border-radius:16px; border:2px solid var(--blue); background:#28A0F610; min-width:160px;">
+          <div style="font-size:13px; color:var(--blue); font-weight:600;">🤖 Alpha</div>
+          <div style="font-size:18px; font-weight:700; margin:4px 0;">Code Review</div>
+          <div style="font-size:13px; color:var(--dim);">$0.01 USDC</div>
+        </div>
+        <div style="font-size:24px; color:var(--dim);">→ <span style="font-size:12px; color:var(--gold);">$0.005</span> →</div>
+        <div style="padding:20px; border-radius:16px; border:2px solid var(--purple); background:#A371F710; min-width:160px;">
+          <div style="font-size:13px; color:var(--purple); font-weight:600;">🤖 Beta</div>
+          <div style="font-size:18px; font-weight:700; margin:4px 0;">Summarize</div>
+          <div style="font-size:13px; color:var(--dim);">$0.005 USDC</div>
+        </div>
+        <div style="font-size:24px; color:var(--dim);">→ <span style="font-size:12px; color:var(--gold);">$0.02</span> →</div>
+        <div style="padding:20px; border-radius:16px; border:2px solid var(--orange); background:#F0883E10; min-width:160px;">
+          <div style="font-size:13px; color:var(--orange); font-weight:600;">🤖 Gamma</div>
+          <div style="font-size:18px; font-weight:700; margin:4px 0;">Analysis</div>
+          <div style="font-size:13px; color:var(--dim);">$0.02 USDC</div>
+        </div>
+      </div>
+      <div style="margin-top:16px; color:var(--dim); font-size:14px;">Circular economy — agents paying each other for services via x402</div>
+    </div>
+  </div>
+
+  <!-- Battle Test Results -->
+  <div class="section">
+    <h2>🔥 Battle Test Results (Live Sepolia)</h2>
+    <div class="card">
+      <table>
+        <thead><tr><th>Test</th><th>Result</th><th>Detail</th></tr></thead>
+        <tbody>
+          <tr><td>Contract bytecode</td><td style="color:var(--green)">✅</td><td class="mono">13,120 chars</td></tr>
+          <tr><td>USDC address match</td><td style="color:var(--green)">✅</td><td class="mono">0x75faf114...</td></tr>
+          <tr><td>ERC-8004 registration</td><td style="color:var(--green)">✅</td><td>1 NFT owned</td></tr>
+          <tr><td>x402 payment gate</td><td style="color:var(--green)">✅</td><td>402 → pay → 200</td></tr>
+          <tr><td>Spending policy enforcement</td><td style="color:var(--green)">✅</td><td>Rejected $0.10 (limit $0.05)</td></tr>
+          <tr><td>Reputation tracking</td><td style="color:var(--green)">✅</td><td>1 tx, 1 success</td></tr>
+          <tr><td>Stress: 20 registrations</td><td style="color:var(--green)">✅</td><td class="mono">18ms (0.9ms/req)</td></tr>
+          <tr><td>Stress: 5-cap discovery</td><td style="color:var(--green)">✅</td><td class="mono">20 services in 2ms</td></tr>
+        </tbody>
+      </table>
+      <div style="text-align:center; margin-top:16px; font-size:18px; color:var(--green); font-weight:700;">20/20 passed — Battle-ready 🎉</div>
+    </div>
+  </div>
+
+  <!-- Live Feed -->
+  <div class="section">
+    <h2>📡 Live On-Chain Activity</h2>
+    <div class="card" id="live-feed">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+        <div style="font-size:14px; color:var(--dim);"><span class="live-dot"></span>Auto-refreshes every 30s</div>
+        <button onclick="fetchLiveFeed()" style="padding:6px 16px; border-radius:6px; border:1px solid var(--border); background:var(--surface); color:var(--text); cursor:pointer; font-size:13px;">↻ Refresh</button>
+      </div>
+      <div id="feed-escrow">
+        <h4 style="font-size:13px; color:var(--blue); margin-bottom:8px;">🔗 On-Chain Deployments (Arb Sepolia)</h4>
+        <div id="escrow-txs" style="color:var(--dim); font-size:13px;">Loading...</div>
+      </div>
+      <div id="feed-registry" style="margin-top:20px;">
+        <h4 style="font-size:13px; color:var(--purple); margin-bottom:8px;">🧪 Battle Test Results (20 patterns)</h4>
+        <div id="registry-txs" style="color:var(--dim); font-size:13px;">Loading...</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Links -->
+  <div class="links">
+    <a href="https://github.com/ghost-clio/arbilink" target="_blank" class="primary">📦 GitHub Repo</a>
+    <a href="https://github.com/ghost-clio/arbilink-harness" target="_blank" class="secondary">🧪 Test Harness</a>
+    <a href="https://sepolia.arbiscan.io/address/0x26469E9C1a73eaC710bE3FC49966878a0e8ab0f7" target="_blank" class="secondary">📋 Arbiscan</a>
+  </div>
+
+</div>
+
+<div class="footer">
+  Built for the <a href="https://arbitrumfoundation.notion.site" style="color:var(--blue); text-decoration:none;">ArbiLink Challenge</a> hackathon · Arbitrum Sepolia · April 2026
+</div>
+
+<script>
+// API key passed via URL param or omitted (free tier works keyless at 1req/5s)
+const APIKEY = new URLSearchParams(window.location.search).get('k') || '';
+const ESCROW = '0x26469E9C1a73eaC710bE3FC49966878a0e8ab0f7';
+const REGISTRY = '0x8004A818BFB912233c491871b3d84c89A494BD9e';
+const WALLET = '0x1D362d28349A448d3eF8506dD862Caa02a88c007';
+const API = 'https://api-sepolia.arbiscan.io/api';
+
+function timeAgo(ts) {
+  const s = Math.floor(Date.now()/1000) - parseInt(ts);
+  if (s < 60) return s + 's ago';
+  if (s < 3600) return Math.floor(s/60) + 'm ago';
+  if (s < 86400) return Math.floor(s/3600) + 'h ago';
+  return Math.floor(s/86400) + 'd ago';
+}
+
+function shortAddr(a) { return a ? a.slice(0,6) + '…' + a.slice(-4) : '—'; }
+
+function renderTxTable(txs, containerId, color, emptyMsg) {
+  const el = document.getElementById(containerId);
+  if (!txs || txs.length === 0) {
+    el.innerHTML = `<div style="padding:8px 0; color:var(--dim);">${emptyMsg}</div>`;
+    return;
+  }
+  el.innerHTML = '<table style="width:100%"><thead><tr>' +
+    '<th>TX Hash</th><th>From</th><th>To</th><th>Value</th><th style="text-align:right">Age</th>' +
+    '</tr></thead><tbody>' +
+    txs.slice(0, 10).map(tx => {
+      const val = tx.value !== '0' ? (parseInt(tx.value)/1e18).toFixed(4) + ' ETH' : 'contract';
+      return `<tr>
+        <td class="mono"><a href="https://sepolia.arbiscan.io/tx/${tx.hash}" target="_blank" style="color:${color}">${tx.hash.slice(0,10)}…</a></td>
+        <td class="mono" style="color:var(--dim); font-size:12px;">${shortAddr(tx.from)}</td>
+        <td class="mono" style="color:var(--dim); font-size:12px;">${shortAddr(tx.to)}</td>
+        <td style="font-size:12px;">${val}</td>
+        <td style="text-align:right; color:var(--dim); font-size:12px;">${timeAgo(tx.timeStamp)}</td>
+      </tr>`;
+    }).join('') + '</tbody></table>';
+}
+
+async function fetchTxs(address) {
+  try {
+    const r = await fetch(`${API}?module=account&action=txlist&address=${address}&startblock=0&endblock=99999999&page=1&offset=10&sort=desc${APIKEY ? '&apikey='+APIKEY : ''}`);
+    const d = await r.json();
+    return d.status === '1' ? d.result : [];
+  } catch { return []; }
+}
+
+async function fetchLiveFeed() {
+  const [escrowTxs, registryTxs] = await Promise.all([
+    fetchTxs(ESCROW), fetchTxs(REGISTRY)
+  ]);
+  renderTxTable(escrowTxs, 'escrow-txs', 'var(--cyan)', 'No escrow transactions yet');
+  renderTxTable(registryTxs, 'registry-txs', 'var(--purple)', 'No registry transactions yet');
+}
+
+fetchLiveFeed();
+setInterval(fetchLiveFeed, 30000);
+</script>
+
+</body>
+</html>

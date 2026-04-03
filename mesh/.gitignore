@@ -1,0 +1,7 @@
+node_modules/
+dist/
+transactions.jsonl
+.env
+build/
+scripts/send-eth.mjs
+scripts/register-agent.mjs
