@@ -14,7 +14,7 @@ https://github.com/user-attachments/assets/56cd7bc2-d73c-40db-a3b6-df192c9e7be2
 [![MoonPay CLI](https://img.shields.io/badge/MoonPay%20CLI-v1.12-purple)]()
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-🔗 **[Live Dashboard](https://ghost-clio.github.io/aegis-mesh/)** · **[Aegis Core](https://github.com/ghost-clio/aegis-agent)** · **[OWS Hackathon](https://hackathon.openwallet.sh)**
+🖥️ **[Live Dashboard](https://ghost-clio.github.io/aegis-mesh/)** · 🧪 **[Test Harness](https://github.com/ghost-clio/aegis-mesh-harness)** · 🛡️ **[Aegis Core](https://github.com/ghost-clio/aegis-agent)** · **[OWS Hackathon](https://hackathon.openwallet.sh)**
 
 ## The Problem
 
