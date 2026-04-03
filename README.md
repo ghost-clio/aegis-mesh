@@ -2,9 +2,9 @@
 
 > Give your AI agent a wallet and still sleep at night. One agent or a hundred.
 
-https://github.com/user-attachments/assets/4b959f21-e045-4273-886f-cc068140f94b
 
 
+https://github.com/user-attachments/assets/56cd7bc2-d73c-40db-a3b6-df192c9e7be2
 
 
 
