@@ -71,6 +71,8 @@ export function createGateway(port = 3404) {
   // ── x402 Payment (governed) ──
   app.post('/pay', (req, res) => {
     const { buyerId, serviceId, amount, chain, protocol, proof } = req.body;
+    if (!buyerId || !serviceId) return res.status(400).json({ error: 'buyerId and serviceId required' });
+    if (typeof amount !== 'number' || amount < 0) return res.status(400).json({ error: 'amount must be a non-negative number' });
     const chainName = chain || 'arbitrum';
 
     // Step 1: Governance check
@@ -170,7 +172,8 @@ export function createGateway(port = 3404) {
   // ── NL Policy Editor ──
   app.post('/governance/nl-policy', (req, res) => {
     const { text } = req.body;
-    if (!text) return res.status(400).json({ error: 'text required' });
+    if (!text || typeof text !== 'string') return res.status(400).json({ error: 'text (string) required' });
+    if (text.length > 500) return res.status(400).json({ error: 'text too long (max 500 chars)' });
 
     // Simple NL → policy mapping
     const updates = {};

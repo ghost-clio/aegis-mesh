@@ -2,66 +2,145 @@ import { describe, it, before, after } from 'node:test';
 import assert from 'node:assert/strict';
 import { createGateway } from '../src/gateway.js';
 
-describe('Aegis Mesh Gateway', () => {
-  let gateway, baseUrl;
+describe('Aegis Mesh Gateway (HTTP)', () => {
+  let server, port;
 
   before(async () => {
-    process.env.NODE_ENV = 'test';
-    gateway = createGateway(0); // random port
-    const app = gateway.start();
-    // For test mode, use supertest-like approach
-    baseUrl = 'test';
+    const gw = createGateway(0);
+    server = gw.app.listen(0);
+    port = server.address().port;
   });
 
-  it('health returns dual-chain config', async () => {
-    const app = gateway.app;
-    // Direct handler test
-    const res = await new Promise((resolve) => {
-      const req = { query: {} };
-      const res = { json: (data) => resolve(data) };
-      app._router.stack.find(l => l.route?.path === '/health').route.stack[0].handle(req, res);
+  after(() => { server?.close(); });
+
+  it('health returns dual-chain config with 16 features', async () => {
+    const res = await fetch(`http://localhost:${port}/health`);
+    const data = await res.json();
+    assert.equal(data.status, 'ok');
+    assert.equal(data.chains.length, 2);
+    assert.equal(data.governance, 'aegis-6-layer');
+    assert.ok(data.features.includes('dual_chain'));
+    assert.ok(data.features.includes('aegis_governance'));
+    assert.ok(data.features.includes('nl_policy_editor'));
+    assert.ok(data.features.includes('moonpay_bridge'));
+    assert.equal(data.features.length, 16);
+  });
+
+  it('registers service', async () => {
+    const res = await fetch(`http://localhost:${port}/register`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id: 'test-svc', name: 'Test Service', chain: 'arbitrum' }),
     });
-    assert.equal(res.status, 'ok');
-    assert.equal(res.chains.length, 2);
-    assert.equal(res.governance, 'aegis-6-layer');
-    assert.ok(res.features.includes('dual_chain'));
-    assert.ok(res.features.includes('aegis_governance'));
-    assert.ok(res.features.includes('nl_policy_editor'));
-    assert.ok(res.features.includes('moonpay_bridge'));
+    const data = await res.json();
+    assert.equal(data.registered, 'test-svc');
   });
 
-  it('has 16 features', async () => {
-    const res = await new Promise((resolve) => {
-      const req = { query: {} };
-      const res = { json: (data) => resolve(data) };
-      app._router?.stack?.find(l => l.route?.path === '/health')?.route?.stack[0]?.handle(req, res);
-    }).catch(() => null);
-    // Fallback: check feature count from gateway directly
-    assert.equal(16, 16); // verified in health endpoint
+  it('discovers services', async () => {
+    const res = await fetch(`http://localhost:${port}/discover`);
+    const data = await res.json();
+    assert.ok(data.count >= 1);
   });
-});
 
-describe('Governance Integration', () => {
-  it('denies payment over per-tx cap via gateway', async () => {
-    process.env.NODE_ENV = 'test';
-    const { app } = createGateway(0);
-    
-    // Simulate request
-    const result = await new Promise((resolve) => {
-      const req = {
-        body: { buyerId: 'test-agent', serviceId: 'test-svc', amount: 50, chain: 'arbitrum', protocol: 'x402' },
-      };
-      const res = {
-        status: (code) => ({ json: (data) => resolve({ code, ...data }) }),
-        json: (data) => resolve({ code: 200, ...data }),
-      };
-      // Find pay route
-      const payRoute = app._router.stack.find(l => l.route?.path === '/pay' && l.route?.methods?.post);
-      if (payRoute) payRoute.route.stack[0].handle(req, res);
-      else resolve({ code: 404 });
+  it('approves valid payment', async () => {
+    const res = await fetch(`http://localhost:${port}/pay`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ buyerId: 'test-buyer', serviceId: 'test-svc', amount: 5, chain: 'arbitrum', protocol: 'x402' }),
     });
+    assert.equal(res.status, 200);
+    const data = await res.json();
+    assert.equal(data.governance, 'approved');
+    assert.ok(data.txId);
+  });
 
-    assert.equal(result.code, 403);
-    assert.equal(result.layer, 2);
+  it('denies payment over per-tx cap', async () => {
+    const res = await fetch(`http://localhost:${port}/pay`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ buyerId: 'rogue', serviceId: 'test-svc', amount: 50, chain: 'arbitrum', protocol: 'x402' }),
+    });
+    assert.equal(res.status, 403);
+    const data = await res.json();
+    assert.equal(data.layer, 2);
+    assert.equal(data.governance, 'aegis');
+  });
+
+  it('denies payment on unauthorized chain', async () => {
+    const res = await fetch(`http://localhost:${port}/pay`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ buyerId: 'test', serviceId: 'test-svc', amount: 5, chain: 'solana', protocol: 'x402' }),
+    });
+    assert.equal(res.status, 403);
+    const data = await res.json();
+    assert.equal(data.layer, 3);
+  });
+
+  it('rejects missing buyerId', async () => {
+    const res = await fetch(`http://localhost:${port}/pay`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ serviceId: 'test-svc', amount: 5 }),
+    });
+    assert.equal(res.status, 400);
+  });
+
+  it('rejects negative amount', async () => {
+    const res = await fetch(`http://localhost:${port}/pay`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ buyerId: 'test', serviceId: 'test-svc', amount: -5 }),
+    });
+    assert.equal(res.status, 400);
+  });
+
+  it('NL policy editor parses daily limit', async () => {
+    const res = await fetch(`http://localhost:${port}/governance/nl-policy`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ text: 'Set daily limit to $75' }),
+    });
+    const data = await res.json();
+    assert.equal(data.parsed, true);
+    assert.equal(data.updates.dailyLimit, 75);
+  });
+
+  it('fleet view returns agents', async () => {
+    const res = await fetch(`http://localhost:${port}/fleet`);
+    const data = await res.json();
+    assert.ok(data.totalTxs >= 0);
+    assert.ok(data.chains.includes('arbitrum'));
+  });
+
+  it('audit log returns entries', async () => {
+    const res = await fetch(`http://localhost:${port}/audit`);
+    const data = await res.json();
+    assert.ok(data.total >= 0);
+    assert.ok(Array.isArray(data.entries));
+  });
+
+  it('CSV export returns text/csv', async () => {
+    const res = await fetch(`http://localhost:${port}/audit/csv`);
+    assert.ok(res.headers.get('content-type').includes('text/csv'));
+  });
+
+  it('bridge status returns both routes', async () => {
+    const res = await fetch(`http://localhost:${port}/bridge/status`);
+    const data = await res.json();
+    assert.equal(data.bridges.length, 2);
+    assert.equal(data.bridges[0].from, 'arbitrum');
+    assert.equal(data.bridges[1].from, 'xrplEvm');
+  });
+
+  it('XRPL EVM payment works', async () => {
+    const res = await fetch(`http://localhost:${port}/pay`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ buyerId: 'xrpl-buyer', serviceId: 'xrpl-svc', amount: 2, chain: 'xrplEvm', protocol: 'x402' }),
+    });
+    assert.equal(res.status, 200);
+    const data = await res.json();
+    assert.equal(data.chain, 'xrplEvm');
   });
 });
