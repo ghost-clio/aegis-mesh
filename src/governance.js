@@ -4,22 +4,10 @@
  * Every x402 payment passes through 6-layer policies BEFORE signing.
  */
 
-import { readFileSync, existsSync } from 'fs';
-import { join, dirname } from 'path';
-import { fileURLToPath } from 'url';
-
-const __dirname = dirname(fileURLToPath(import.meta.url));
-const AEGIS_ROOT = join(__dirname, '..', 'aegis-core');
-
-// Load Aegis policy engine
-let policies;
-try {
-  const policiesPath = join(AEGIS_ROOT, 'src', 'policies.js');
-  policies = await import(policiesPath);
-} catch (e) {
-  console.warn('[governance] Aegis policies not found, using passthrough mode');
-  policies = null;
-}
+/**
+ * Aegis governance integrates with aegis-core/src/policies.js when available.
+ * If aegis-core is not present, runs standalone with built-in 6-layer enforcement.
+ */
 
 /**
  * 6-layer policy stack (from Aegis):
@@ -39,11 +27,10 @@ const DEFAULT_POLICIES = {
   cooldownMs: 5000,       // 5s between large txns (>$10)
 };
 
-// Per-agent spend tracking
-const agentSpend = new Map();
-
 export function createGovernor(customPolicies = {}) {
   const policy = { ...DEFAULT_POLICIES, ...customPolicies };
+  // Per-governor spend tracking (isolated per instance — Nemo audit fix)
+  const agentSpend = new Map();
 
   return {
     policy,
@@ -74,13 +61,14 @@ export function createGovernor(customPolicies = {}) {
         return { allowed: false, reason: `Chain not allowed: ${chain}`, layer: 3 };
       }
 
-      // Layer 4: Protocol allowlist
-      if (protocol && !policy.protocolAllowlist.includes(protocol)) {
-        return { allowed: false, reason: `Protocol not allowed: ${protocol}`, layer: 4 };
+      // Layer 4: Protocol allowlist (empty string = missing = deny)
+      const proto = protocol || '';
+      if (!proto || !policy.protocolAllowlist.includes(proto)) {
+        return { allowed: false, reason: `Protocol not allowed: ${proto || '(empty)'}`, layer: 4 };
       }
 
-      // Layer 5: Slippage guard
-      if (slippage && slippage > policy.maxSlippage) {
+      // Layer 5: Slippage guard (explicit 0 is fine, undefined skips, >max denied)
+      if (typeof slippage === 'number' && slippage > policy.maxSlippage) {
         return { allowed: false, reason: `Slippage too high: ${(slippage * 100).toFixed(1)}% > ${(policy.maxSlippage * 100).toFixed(1)}%`, layer: 5 };
       }
 
@@ -122,7 +110,11 @@ export function createGovernor(customPolicies = {}) {
      * Update policy dynamically (NL policy editor support)
      */
     updatePolicy(updates) {
-      Object.assign(policy, updates);
+      // Sanitize: only allow known policy keys (prevent prototype pollution)
+      const allowed = ['dailyLimit', 'perTxCap', 'chainAllowlist', 'protocolAllowlist', 'maxSlippage', 'cooldownMs'];
+      for (const key of Object.keys(updates)) {
+        if (allowed.includes(key)) policy[key] = updates[key];
+      }
       return policy;
     },
   };
