@@ -1,6 +1,6 @@
-# Aegis Mesh — Governed Multi-Agent Economy
+# Aegis Mesh — Governed Agent Wallets
 
-> 8 agents. 2 chains. 6 policy layers. Zero blank checks.
+> Give your AI agent a wallet and still sleep at night. One agent or a hundred.
 
 https://github.com/user-attachments/assets/4b959f21-e045-4273-886f-cc068140f94b
 
@@ -18,9 +18,9 @@ https://github.com/user-attachments/assets/4b959f21-e045-4273-886f-cc068140f94b
 
 ## The Problem
 
-You can give an agent a wallet. But can you give 8 agents wallets across 2 chains and sleep at night?
+Giving an AI agent a wallet today means giving it a blank check. No spending limits, no audit trail, no way to say "stop" in plain English.
 
-Current agent wallets are single-chain, ungoverned, and blind — one rogue agent drains everything, and there's no audit trail, no cross-chain coordination, and no human-readable policy controls.
+Whether you run one agent or a fleet, you need governance that scales with you — from a single assistant with a $50/day budget to a cross-chain economy with dozens of agents and real-time oversight.
 
 ## The Solution
 
@@ -63,7 +63,7 @@ npm install
 # Run tests (23 mesh + 66 Aegis Core)
 npm test
 
-# Run the 8-agent harness
+# Run the demo harness (8 agents across 2 chains)
 node src/harness.js
 
 # Open the dashboard
@@ -72,11 +72,12 @@ open docs/index.html
 
 ## What It Does
 
-### Dual-Chain x402 Mesh
-- **Arbitrum Sepolia** (chain 421614) — 4 agents transacting via x402 micropayments
-- **XRPL EVM Sidechain** (chain 1440000) — 4 agents on Ripple's EVM, same gateway
-- **Cross-chain scenarios** — agents on Arbitrum buy services from XRPL agents and vice versa
-- Same 16 features work on both chains: service discovery, reputation, escrow, fleet admin
+### Multi-Chain x402 Mesh
+- Works with **a single agent** or **dozens** — governance scales automatically
+- **Arbitrum Sepolia** (chain 421614) — x402 micropayments
+- **XRPL EVM Sidechain** (chain 1440000) — Ripple's EVM, same gateway
+- **Cross-chain** — agents on different chains can transact with each other
+- 16 features: service discovery, reputation, escrow, fleet admin, CSV export, and more
 
 ### Aegis 6-Layer Governance
 Every payment passes through all 6 layers:
