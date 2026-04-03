@@ -2,6 +2,12 @@
 
 > 8 agents. 2 chains. 6 policy layers. Zero blank checks.
 
+https://github.com/user-attachments/assets/4b959f21-e045-4273-886f-cc068140f94b
+
+
+
+
+
 [![Tests](https://img.shields.io/badge/mesh_tests-45%20passing-brightgreen)]()
 [![Aegis Core](https://img.shields.io/badge/aegis_core-66%20passing-brightgreen)]()
 [![OWS](https://img.shields.io/badge/OWS-v0.3-blue)]()
