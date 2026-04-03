@@ -174,12 +174,6 @@ aegis-mesh/
 └── README.md
 ```
 
-## Tracks
-
-- **Track 02: Agent Spend Governance & Identity** — 6-layer policy engine, NL editor, fleet admin, audit logs
-- **Track 04: Multi-Agent Systems & Autonomous Economies** — 8 agents, dual-chain mesh, cross-chain transactions
-- **Track 03: Pay-Per-Call Services & API Monetization** — x402 micropayment gateway for any service
-
 ## License
 
 MIT
