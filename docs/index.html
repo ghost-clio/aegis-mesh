@@ -368,11 +368,12 @@ function renderFeed(containerId, entries, color) {
 function renderAudit() {
   const el = document.getElementById('audit-feed');
   el.innerHTML = auditEntries.slice(0, 20).map(e => `
-    <div class="tx-entry">
+    <div class="tx-entry" style="cursor:${e.txId !== 'DENIED' ? 'pointer' : 'default'};" onclick="if('${e.txId}'!=='DENIED') window.open('${e.chain === 'xrplEvm' ? 'https://explorer.xrplevm.org/tx/' : 'https://sepolia.arbiscan.io/tx/'}${e.txId}', '_blank')">
       <div>
         <span style="color:${e.status === 'denied' ? 'var(--red)' : 'var(--green)'}; font-weight:600;">${e.status === 'denied' ? 'DENY' : 'PASS'}</span>
-        <span class="mono" style="margin-left:8px; color:var(--dim);">${e.txId.slice(0,12)}</span>
+        <span class="mono" style="margin-left:8px; color:var(--dim);">${e.txId === 'DENIED' ? '—' : e.txId.slice(0,12)}</span>
         <span style="margin-left:8px;">${e.buyer}→${e.seller}</span>
+        ${txLink(e.txId, e.chain)}
       </div>
       <div style="text-align:right;">
         <span>$${e.amount.toFixed(2)}</span>
