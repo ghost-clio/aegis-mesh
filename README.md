@@ -2,7 +2,7 @@
 
 > 8 agents. 2 chains. 6 policy layers. Zero blank checks.
 
-[![Tests](https://img.shields.io/badge/mesh_tests-23%20passing-brightgreen)]()
+[![Tests](https://img.shields.io/badge/mesh_tests-45%20passing-brightgreen)]()
 [![Aegis Core](https://img.shields.io/badge/aegis_core-66%20passing-brightgreen)]()
 [![OWS](https://img.shields.io/badge/OWS-v0.3-blue)]()
 [![MoonPay CLI](https://img.shields.io/badge/MoonPay%20CLI-v1.12-purple)]()
