@@ -28,28 +28,17 @@ Whether you run one agent or a fleet, you need governance that scales with you �
 
 Every payment passes through **6 policy layers** before signing. Every transaction lands in an **append-only audit log**. Every agent has a **scoped budget** enforced in real time. Policies are updated via **natural language** — no code changes needed.
 
-```
-┌───────────────────────────────────────────────────────────────┐
-│                     AEGIS MESH GATEWAY                        │
-│                                                               │
-│  ┌──────────────┐  ┌───────────────────┐  ┌───────────────┐  │
-│  │ Aegis Vault   │  │ 6-Layer Policy    │  │ MoonPay CLI   │  │
-│  │ (OWS keys)    │  │ Engine            │  │ (Bridges)     │  │
-│  │ AES-256-GCM   │  │ 1. Daily limit    │  │ Fiat on-ramp  │  │
-│  │ Key isolation  │  │ 2. Per-tx cap     │  │ USDC ↔ RLUSD  │  │
-│  │ Multi-chain    │  │ 3. Chain allow    │  │ 17 skills     │  │
-│  └──────────────┘  │ 4. Protocol allow  │  └───────────────┘  │
-│                     │ 5. Slippage guard  │                     │
-│                     │ 6. Cooldown        │                     │
-│                     └───────────────────┘                     │
-│                              │                                │
-│        ┌─────────────────────┼─────────────────┐              │
-│        ▼                     ▼                  ▼             │
-│  ┌───────────┐         ┌───────────┐      ┌───────────┐      │
-│  │ Arbitrum  │◄───────►│ XRPL EVM  │◄────►│  Bridge   │      │
-│  │ 4 agents  │         │ 4 agents  │      │  MoonPay  │      │
-│  └───────────┘         └───────────┘      └───────────┘      │
-└───────────────────────────────────────────────────────────────┘
+```mermaid
+graph TD
+    subgraph GATEWAY["AEGIS MESH GATEWAY"]
+        VAULT["🔐 Aegis Vault<br/>OWS keys · AES-256-GCM<br/>Key isolation · Multi-chain"]
+        POLICY["🛡️ 6-Layer Policy Engine<br/>1. Daily limit<br/>2. Per-tx cap<br/>3. Chain allowlist<br/>4. Protocol allowlist<br/>5. Slippage guard<br/>6. Cooldown"]
+        MOON["🌉 MoonPay CLI<br/>Fiat on-ramp<br/>USDC ↔ RLUSD<br/>17 skills"]
+    end
+
+    GATEWAY --> ARB["⟠ Arbitrum"]
+    GATEWAY --> XRPL["✦ XRPL EVM"]
+    ARB <--> BRIDGE["🌉 Bridge<br/>MoonPay"] <--> XRPL
 ```
 
 ## Quick Start
