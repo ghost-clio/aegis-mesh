@@ -115,49 +115,72 @@
   </div>
 </div>
 
-<!-- Architecture -->
+<!-- Architecture — visual cards -->
 <div class="card" style="margin-bottom: 16px;">
   <div class="card-title">🏗️ Architecture</div>
-  <pre style="font-size: 11px; color: var(--dim); line-height: 1.5; overflow-x: auto;">
-┌─────────────────────────────────────────────────────────────────────────┐
-│                         AEGIS MESH GATEWAY                              │
-│                                                                         │
-│  ┌──────────────────┐    ┌──────────────────┐    ┌──────────────────┐  │
-│  │  Aegis Treasury   │    │  6-Layer Policy   │    │   MoonPay CLI    │  │
-│  │  (OWS Vault)      │    │  Engine           │    │   (Bridges)      │  │
-│  │                    │    │                    │    │                    │  │
-│  │  • AES-256-GCM    │    │  1. Daily limit    │    │  • Fiat on-ramp  │  │
-│  │  • Key isolation   │    │  2. Per-tx cap     │    │  • Cross-chain   │  │
-│  │  • Multi-chain     │    │  3. Chain allow    │    │  • USDC ↔ RLUSD  │  │
-│  │  • CAIP-2/10       │    │  4. Protocol allow │    │  • 17 skills     │  │
-│  │  • Audit trail     │    │  5. Slippage guard │    │                    │  │
-│  └──────────────────┘    │  6. Cooldown        │    └──────────────────┘  │
-│                           └──────────────────┘                            │
-│                                    │                                      │
-│         ┌──────────────────────────┼──────────────────────────┐          │
-│         ▼                          ▼                          ▼          │
-│  ┌─────────────┐           ┌─────────────┐           ┌──────────────┐   │
-│  │  Arbitrum    │           │  XRPL EVM   │           │  🌉 Bridge   │   │
-│  │  Sepolia     │◄─────────►│  Sidechain  │◄─────────►│  MoonPay     │   │
-│  │  Chain 421614│           │  Chain 1.44M │           │  USDC↔RLUSD  │   │
-│  └─────────────┘           └─────────────┘           └──────────────┘   │
-│         │                          │                                      │
-│    ┌────┴────┐                ┌────┴────┐                                │
-│    │ 4 Agents│                │ 4 Agents│   = 8 agents, dual-chain mesh  │
-│    └─────────┘                └─────────┘                                │
-└─────────────────────────────────────────────────────────────────────────┘</pre>
+  <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 16px;">
+    <div style="background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 14px;">
+      <div style="font-size: 20px; margin-bottom: 6px;">🔐</div>
+      <div style="font-weight: 600; font-size: 13px; margin-bottom: 6px;">Aegis Treasury</div>
+      <div style="font-size: 11px; color: var(--dim); line-height: 1.6;">
+        AES-256-GCM encryption<br>Key isolation per agent<br>Multi-chain (CAIP-2/10)<br>Append-only audit trail
+      </div>
+    </div>
+    <div style="background: var(--bg); border: 1px solid var(--green); border-radius: 8px; padding: 14px;">
+      <div style="font-size: 20px; margin-bottom: 6px;">🛡️</div>
+      <div style="font-weight: 600; font-size: 13px; margin-bottom: 6px; color: var(--green);">6-Layer Policy Engine</div>
+      <div style="font-size: 11px; color: var(--dim); line-height: 1.6;">
+        1. Daily spending limit<br>2. Per-transaction cap<br>3. Chain allowlist<br>4. Protocol allowlist<br>5. Slippage guard<br>6. Cooldown period
+      </div>
+    </div>
+    <div style="background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 14px;">
+      <div style="font-size: 20px; margin-bottom: 6px;">🌙</div>
+      <div style="font-weight: 600; font-size: 13px; margin-bottom: 6px;">MoonPay CLI</div>
+      <div style="font-size: 11px; color: var(--dim); line-height: 1.6;">
+        Fiat on-ramp (USD→USDC)<br>Cross-chain bridge<br>USDC ↔ RLUSD<br>17 skills available
+      </div>
+    </div>
+  </div>
+  <div style="display: grid; grid-template-columns: 1fr auto 1fr auto 1fr; gap: 12px; align-items: center;">
+    <div style="background: rgba(96,165,250,0.08); border: 1px solid rgba(96,165,250,0.3); border-radius: 8px; padding: 12px; text-align: center;">
+      <div style="font-weight: 600; color: var(--blue);">⟐ Arbitrum Sepolia</div>
+      <div style="font-size: 11px; color: var(--dim);">Chain 421614 · 4 agents</div>
+    </div>
+    <div style="font-size: 24px; color: var(--cyan);">⟷</div>
+    <div style="background: rgba(34,211,238,0.08); border: 1px solid rgba(34,211,238,0.3); border-radius: 8px; padding: 12px; text-align: center;">
+      <div style="font-weight: 600; color: var(--cyan);">🌉 MoonPay Bridge</div>
+      <div style="font-size: 11px; color: var(--dim);">USDC ↔ RLUSD</div>
+    </div>
+    <div style="font-size: 24px; color: var(--cyan);">⟷</div>
+    <div style="background: rgba(167,139,250,0.08); border: 1px solid rgba(167,139,250,0.3); border-radius: 8px; padding: 12px; text-align: center;">
+      <div style="font-weight: 600; color: var(--purple);">✕ XRPL EVM</div>
+      <div style="font-size: 11px; color: var(--dim);">Chain 1440000 · 4 agents</div>
+    </div>
+  </div>
 </div>
 
+<!-- Fleet FIRST, then activity feeds -->
+<h2>📊 Fleet View — 8 Agents</h2>
+<div class="card" style="margin-bottom: 16px;">
+  <table id="fleet-table">
+    <thead>
+      <tr><th>Agent</th><th>Chain</th><th>Role</th><th>Transactions</th><th>Spent</th><th>Success</th></tr>
+    </thead>
+    <tbody id="fleet-body"></tbody>
+  </table>
+</div>
+
+<h2>⚡ Live Agent Activity</h2>
 <div class="grid2">
   <!-- Left: Arbitrum Feed -->
   <div class="card">
-    <div class="card-title"><span class="chain-tag chain-arb">ARBITRUM</span> Agent Activity</div>
+    <div class="card-title"><span class="chain-tag chain-arb">ARBITRUM</span> Transactions</div>
     <div class="tx-feed" id="arb-feed"></div>
   </div>
 
   <!-- Right: XRPL EVM Feed -->
   <div class="card">
-    <div class="card-title"><span class="chain-tag chain-xrpl">XRPL EVM</span> Agent Activity</div>
+    <div class="card-title"><span class="chain-tag chain-xrpl">XRPL EVM</span> Transactions</div>
     <div class="tx-feed" id="xrpl-feed"></div>
   </div>
 </div>
@@ -199,16 +222,6 @@
       <div style="font-size: 11px; color: var(--dim);">RLUSD</div>
     </div>
   </div>
-</div>
-
-<h2>📊 Fleet View — 8 Agents</h2>
-<div class="card">
-  <table id="fleet-table">
-    <thead>
-      <tr><th>Agent</th><th>Chain</th><th>Role</th><th>Transactions</th><th>Spent</th><th>Success</th></tr>
-    </thead>
-    <tbody id="fleet-body"></tbody>
-  </table>
 </div>
 
 <h2>📜 Audit Log</h2>
@@ -329,13 +342,20 @@ function updateUI() {
   renderFleet();
 }
 
+function txLink(txId, chain) {
+  if (!txId || txId === 'DENIED') return '';
+  const explorer = chain === 'xrplEvm' ? 'https://explorer.xrplevm.org/tx/' : 'https://sepolia.arbiscan.io/tx/';
+  return `<a href="${explorer}${txId}" target="_blank" class="mono" style="color:var(--dim); font-size:10px; text-decoration:none; margin-left:6px; opacity:0.7;" title="View on explorer">🔗 ${txId.slice(0,10)}…</a>`;
+}
+
 function renderFeed(containerId, entries, color) {
   const el = document.getElementById(containerId);
   el.innerHTML = entries.map(e => `
-    <div class="tx-entry">
+    <div class="tx-entry" style="cursor:pointer;" onclick="if('${e.txId}'!=='DENIED') window.open('${e.chain === 'xrplEvm' ? 'https://explorer.xrplevm.org/tx/' : 'https://sepolia.arbiscan.io/tx/'}${e.txId}', '_blank')">
       <div>
         <span style="color:${e.status === 'denied' ? 'var(--red)' : color}; font-weight:600;">${e.status === 'denied' ? '🛡️' : '✅'}</span>
         <span style="margin-left:6px;">${e.desc}</span>
+        ${txLink(e.txId, e.chain)}
       </div>
       <div style="text-align:right;">
         <span style="color:${e.status === 'denied' ? 'var(--red)' : 'var(--green)'}; font-weight:600;">$${e.amount.toFixed(2)}</span>
