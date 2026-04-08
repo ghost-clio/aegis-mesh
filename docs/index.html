@@ -281,52 +281,74 @@ const auditEntries = [];
 const arbFeedEntries = [];
 const xrplFeedEntries = [];
 
-// ── Simulate transactions ──
-function simulateEconomy() {
-  const scenarioIdx = totalTxs % SCENARIOS.length;
-  const s = SCENARIOS[scenarioIdx];
-  const buyer = AGENTS[s.buyer];
-  const seller = AGENTS[s.seller];
-
-  buyer.txs++;
-  buyer.spent += s.amount;
-  buyer.success++;
-  totalTxs++;
-
-  const txId = `tx_${Date.now()}_${Math.random().toString(36).slice(2,6)}`;
-  const entry = {
-    time: new Date().toLocaleTimeString(),
-    txId,
-    buyer: buyer.name,
-    seller: seller.name,
-    amount: s.amount,
-    chain: s.chain === 'cross' ? 'cross-chain' : s.chain,
-    desc: s.desc,
-    status: 'verified',
-    governance: '6/6 passed',
-  };
-
-  auditEntries.unshift(entry);
-  if (entry.chain === 'arbitrum' || entry.chain === 'cross-chain') arbFeedEntries.unshift(entry);
-  if (entry.chain === 'xrplEvm' || entry.chain === 'cross-chain') xrplFeedEntries.unshift(entry);
-
-  // Occasional denial simulation
-  if (totalTxs % 8 === 0 && totalDenials < 20) {
-    const d = DENIALS[totalDenials % DENIALS.length];
-    totalDenials++;
-    auditEntries.unshift({
-      time: new Date().toLocaleTimeString(),
-      txId: 'DENIED',
-      buyer: d.agent,
-      seller: '-',
-      amount: d.amount,
-      chain: d.chain,
-      desc: `🛡️ Layer ${d.layer}: ${d.reason}`,
-      status: 'denied',
-      governance: `Blocked at layer ${d.layer}`,
-    });
+// ── Load real fleet data from exported JSON ──
+async function loadRealData() {
+  try {
+    const [fleetRes, auditRes, metaRes] = await Promise.all([
+      fetch('data/fleet.json').catch(() => null),
+      fetch('data/audit.json').catch(() => null),
+      fetch('data/meta.json').catch(() => null),
+    ]);
+    
+    if (fleetRes && fleetRes.ok) {
+      const fleet = await fleetRes.json();
+      totalTxs = fleet.totalTxs || 0;
+      
+      // Update agent data from real fleet
+      for (const agent of (fleet.agents || [])) {
+        // Find matching AGENTS entry
+        for (const a of Object.values(AGENTS)) {
+          if (agent.id && agent.id.toLowerCase().includes(a.name.toLowerCase().replace('-x','-xrpl').replace(' ','-'))) {
+            a.txs = agent.txCount || 0;
+            a.spent = parseFloat(agent.totalSpent) || 0;
+            a.success = agent.txCount || 0;
+          }
+        }
+      }
+    }
+    
+    if (auditRes && auditRes.ok) {
+      const auditData = await auditRes.json();
+      const entries = auditData.entries || [];
+      
+      auditEntries.length = 0;
+      arbFeedEntries.length = 0;
+      xrplFeedEntries.length = 0;
+      totalDenials = 0;
+      
+      for (const e of entries.reverse()) {
+        const entry = {
+          time: e.timestamp ? new Date(e.timestamp).toLocaleTimeString() : '',
+          txId: e.txId || (e.decision === 'denied' ? 'DENIED' : ''),
+          buyer: e.buyerId || '',
+          seller: e.serviceId || '',
+          amount: e.amount || 0,
+          chain: e.chain || 'arbitrum',
+          desc: e.decision === 'denied' 
+            ? `🛡️ Layer ${e.layer || '?'}: ${e.reason || 'policy'}` 
+            : `${e.buyerId || '?'} → ${e.serviceId || '?'}`,
+          status: e.decision === 'denied' ? 'denied' : 'verified',
+          governance: e.decision === 'denied' ? `Blocked: ${e.reason || ''}` : '6/6 passed',
+        };
+        
+        auditEntries.push(entry);
+        if (entry.status === 'denied') totalDenials++;
+        if (entry.chain === 'arbitrum' || entry.chain === 'cross-chain') arbFeedEntries.push(entry);
+        if (entry.chain === 'xrplEvm' || entry.chain === 'cross-chain') xrplFeedEntries.push(entry);
+      }
+    }
+    
+    if (metaRes && metaRes.ok) {
+      const meta = await metaRes.json();
+      const el = document.querySelector('.subtitle');
+      if (el && meta.exported) {
+        el.textContent += ` · Data exported: ${new Date(meta.exported).toLocaleString()}`;
+      }
+    }
+  } catch (err) {
+    console.log('Fleet data not available:', err);
   }
-
+  
   updateUI();
 }
 
@@ -450,11 +472,10 @@ document.getElementById('test-grid').innerHTML = TESTS.map(t =>
   `<div style="font-size:11px; padding:4px 8px; border-radius:4px; background:var(--surface); border:1px solid var(--border);">✅ ${t}</div>`
 ).join('');
 
-// ── Start simulation ──
-updateUI();
-setInterval(simulateEconomy, 3000);
-// Quick burst to populate
-for (let i = 0; i < 8; i++) simulateEconomy();
+// ── Load real data ──
+loadRealData();
+// Refresh every 60s in case data updates
+setInterval(loadRealData, 60000);
 </script>
 
 </body>
