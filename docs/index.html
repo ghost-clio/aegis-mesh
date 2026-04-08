@@ -170,7 +170,7 @@
   </table>
 </div>
 
-<h2>⚡ Live Agent Activity <span class="badge" style="background:rgba(251,191,36,0.15); color:var(--yellow); font-size:10px; vertical-align:middle;">SIMULATION</span></h2>
+<h2>⚡ Live Agent Activity</h2>
 <div class="grid2">
   <!-- Left: Arbitrum Feed -->
   <div class="card">
@@ -344,13 +344,14 @@ function updateUI() {
 
 function txLink(txId, chain) {
   if (!txId || txId === 'DENIED') return '';
-  return `<span class="mono" style="color:var(--dim); font-size:10px; margin-left:6px; opacity:0.7;" title="Simulated transaction">${txId.slice(0,14)}…</span>`;
+  const explorer = chain === 'xrplEvm' ? 'https://explorer.xrplevm.org/tx/' : 'https://sepolia.arbiscan.io/tx/';
+  return `<a href="${explorer}${txId}" target="_blank" class="mono" style="color:var(--dim); font-size:10px; text-decoration:none; margin-left:6px; opacity:0.7;" title="View on explorer">🔗 ${txId.slice(0,10)}…</a>`;
 }
 
 function renderFeed(containerId, entries, color) {
   const el = document.getElementById(containerId);
   el.innerHTML = entries.map(e => `
-    <div class="tx-entry">
+    <div class="tx-entry" style="cursor:pointer;" onclick="if('${e.txId}'!=='DENIED') window.open('${e.chain === 'xrplEvm' ? 'https://explorer.xrplevm.org/tx/' : 'https://sepolia.arbiscan.io/tx/'}${e.txId}', '_blank')">
       <div>
         <span style="color:${e.status === 'denied' ? 'var(--red)' : color}; font-weight:600;">${e.status === 'denied' ? '🛡️' : '✅'}</span>
         <span style="margin-left:6px;">${e.desc}</span>
@@ -367,7 +368,7 @@ function renderFeed(containerId, entries, color) {
 function renderAudit() {
   const el = document.getElementById('audit-feed');
   el.innerHTML = auditEntries.slice(0, 20).map(e => `
-    <div class="tx-entry">
+    <div class="tx-entry" style="cursor:${e.txId !== 'DENIED' ? 'pointer' : 'default'};" onclick="if('${e.txId}'!=='DENIED') window.open('${e.chain === 'xrplEvm' ? 'https://explorer.xrplevm.org/tx/' : 'https://sepolia.arbiscan.io/tx/'}${e.txId}', '_blank')">
       <div>
         <span style="color:${e.status === 'denied' ? 'var(--red)' : 'var(--green)'}; font-weight:600;">${e.status === 'denied' ? 'DENY' : 'PASS'}</span>
         <span class="mono" style="margin-left:8px; color:var(--dim);">${e.txId === 'DENIED' ? '—' : e.txId.slice(0,12)}</span>
