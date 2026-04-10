@@ -1,1 +1,1 @@
-{"chain":"arbitrum","policy":{"dailyLimit":100,"perTxCap":25,"chainAllowlist":["arbitrum","xrplEvm"],"protocolAllowlist":["x402","mpp"],"maxSlippage":0.05,"cooldownMs":5000},"layers":["Daily spending limit","Per-transaction cap","Chain allowlist (CAIP-2)","Protocol allowlist","Slippage guard","Cooldown period"]}
+{}
