@@ -294,15 +294,13 @@ async function loadRealData() {
       const fleet = await fleetRes.json();
       totalTxs = fleet.totalTxs || 0;
       
-      // Update agent data from real fleet
+      // Update agent data from real fleet — match by exact id
       for (const agent of (fleet.agents || [])) {
-        // Find matching AGENTS entry
-        for (const a of Object.values(AGENTS)) {
-          if (agent.id && agent.id.toLowerCase().includes(a.name.toLowerCase().replace('-x','-xrpl').replace(' ','-'))) {
-            a.txs = agent.txCount || 0;
-            a.spent = parseFloat(agent.totalSpent) || 0;
-            a.success = agent.txCount || 0;
-          }
+        const match = AGENTS.find(a => a.id === agent.id);
+        if (match) {
+          match.txs = agent.txCount || 0;
+          match.spent = parseFloat(agent.totalSpent) || 0;
+          match.success = agent.txCount || 0;
         }
       }
     }

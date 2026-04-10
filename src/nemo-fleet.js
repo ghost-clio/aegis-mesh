@@ -45,9 +45,63 @@ const AGENTS = [
     personality: 'You are Echo-X, a communications agent on XRPL EVM. You bridge language barriers in the mesh.' },
 ];
 
+// ── Local fallback reasons when Nemo is rate-limited ──
+const FALLBACK_REASONS = {
+  'code-review': [
+    'Need audit of governance module before mainnet deploy.',
+    'Security review on cross-chain bridge logic requested.',
+    'Checking smart contract for reentrancy vulnerabilities.',
+    'Reviewing policy engine edge cases for compliance.',
+  ],
+  'web-search': [
+    'Fetching latest gas prices across both chains for optimization.',
+    'Researching current DeFi yield opportunities for treasury.',
+    'Looking up token metadata for new service listings.',
+    'Scanning for governance proposal updates on-chain.',
+  ],
+  'market-data': [
+    'Need real-time price feeds for cross-chain settlement.',
+    'Pulling 24h volume data for fleet spending analysis.',
+    'Checking slippage conditions before large transfer.',
+    'Querying oracle prices for policy threshold calibration.',
+  ],
+  'image-gen': [
+    'Generating agent identity badge for mesh registration.',
+    'Creating visualization of fleet transaction topology.',
+    'Rendering governance decision tree for audit report.',
+    'Producing dashboard chart for cross-chain activity.',
+  ],
+  'summarization': [
+    'Condensing 200-entry audit log for fleet admin review.',
+    'Summarizing daily governance decisions for compliance report.',
+    'Distilling cross-chain transaction patterns for optimization.',
+    'Creating executive briefing on mesh health metrics.',
+  ],
+  'translation': [
+    'Translating service descriptions for multi-locale mesh nodes.',
+    'Converting governance policy to human-readable format.',
+    'Bridging protocol documentation across chain ecosystems.',
+    'Localizing agent capabilities for international mesh discovery.',
+  ],
+};
+const FALLBACK_GENERIC = [
+  'Executing routine inter-agent service request within mesh.',
+  'Processing capability exchange through Aegis governance layer.',
+  'Fulfilling mesh service obligation per spending policy.',
+  'Completing scheduled agent-to-agent transaction cycle.',
+];
+let nemoRateLimited = false;
+
+function localFallbackReason(capability) {
+  const pool = FALLBACK_REASONS[capability] || FALLBACK_GENERIC;
+  return pool[Math.floor(Math.random() * pool.length)];
+}
+
 // ── Nemotron call ──
-async function callNemo(prompt, maxTokens = 150) {
-  if (!OPENROUTER_KEY) return '[Nemotron unavailable — no API key]';
+async function callNemo(prompt, maxTokens = 150, capability = '') {
+  // If already rate limited this session, use local fallback immediately
+  if (nemoRateLimited) return localFallbackReason(capability);
+  if (!OPENROUTER_KEY) return localFallbackReason(capability);
   
   try {
     const controller = new AbortController();
@@ -73,15 +127,24 @@ async function callNemo(prompt, maxTokens = 150) {
     clearTimeout(timeout);
     if (!resp.ok) {
       const err = await resp.text();
+      if (resp.status === 429) {
+        console.log('[Nemo] Rate limited — switching to local fallback reasons for this session.');
+        nemoRateLimited = true;
+        // Reset after 1 hour in case limit resets
+        setTimeout(() => { nemoRateLimited = false; console.log('[Nemo] Rate limit cooldown expired, will retry API.'); }, 3600000);
+        return localFallbackReason(capability);
+      }
       console.error(`[Nemo] API error ${resp.status}: ${err.slice(0, 200)}`);
-      return `[Nemotron error: ${resp.status}]`;
+      return localFallbackReason(capability);
     }
     
+    // Successfully got a response — make sure we're not flagged
+    nemoRateLimited = false;
     const data = await resp.json();
-    return data.choices?.[0]?.message?.content || '[empty response]';
+    return data.choices?.[0]?.message?.content || localFallbackReason(capability);
   } catch (err) {
-    if (err.name === 'AbortError') return '[Nemotron timeout]';
-    return `[Nemotron error: ${err.message}]`;
+    if (err.name === 'AbortError') return localFallbackReason(capability);
+    return localFallbackReason(capability);
   }
 }
 
@@ -157,7 +220,7 @@ async function runAgentCycle(agent) {
   // Ask Nemotron why this agent wants this service
   const prompt = `${agent.personality}\n\nYou want to buy "${capability}" from ${seller.name} (${seller.role}) for $${amount.toFixed(4)}. ${chain !== agent.chain ? 'This is a CROSS-CHAIN transaction.' : ''}\nIn 1-2 sentences, what specific task do you need done? Be concrete.`;
   
-  const reason = await callNemo(prompt, 80);
+  const reason = await callNemo(prompt, 80, capability);
   
   console.log(`  [${agent.name}] → ${seller.name} | ${capability} | $${amount.toFixed(4)} | ${chain}${chain !== agent.chain ? ' 🌉' : ''}`);
   console.log(`    "${reason.slice(0, 120)}"`);
