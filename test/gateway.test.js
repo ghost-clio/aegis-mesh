@@ -36,6 +36,22 @@ describe('Aegis Mesh Gateway (HTTP)', () => {
     assert.equal(data.registered, 'test-svc');
   });
 
+  it('answers browser preflight for payment routes', async () => {
+    const res = await fetch(`http://localhost:${port}/pay`, {
+      method: 'OPTIONS',
+      headers: {
+        Origin: 'https://example.com',
+        'Access-Control-Request-Method': 'POST',
+        'Access-Control-Request-Headers': 'Content-Type, X-Agent-Id, X-Chain, X-Payment-Proof, Idempotency-Key',
+      },
+    });
+    assert.equal(res.status, 204);
+    assert.match(res.headers.get('access-control-allow-methods'), /POST/);
+    assert.match(res.headers.get('access-control-allow-methods'), /OPTIONS/);
+    assert.match(res.headers.get('access-control-allow-headers'), /X-Payment-Proof/);
+    assert.match(res.headers.get('access-control-allow-headers'), /Idempotency-Key/);
+  });
+
   it('discovers services', async () => {
     const res = await fetch(`http://localhost:${port}/discover`);
     const data = await res.json();
